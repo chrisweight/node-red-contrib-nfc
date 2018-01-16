@@ -48,9 +48,10 @@ module.exports = function (RED) {
 		var node = this;
 
 		try {
+			node.log('About to try and start NFC client');
 			this.nfcClient = new nfc.NFC();
 		} catch (err) {
-			node.log(err);
+			node.error(err);
 			node.status(status.error);
 		}
 
@@ -84,6 +85,7 @@ module.exports = function (RED) {
 			node.status(status.connected);
 		} catch (err) {
 			node.status(status.error);
+			node.error(err)
 			node.nfcClient.stop();
 		}
 	};
