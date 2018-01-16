@@ -27,27 +27,39 @@ module.exports = function (RED) {
 		this.name = config.name;
 		this.topic = config.topic;
 
+		var status = {
+			connected: {
+				fill: 'green',
+				shape: 'dot',
+				text: 'Connected'
+			},
+			disconnected: {
+				fill: 'red',
+				shape: 'dot',
+				text: 'Disconnected'
+			},
+			error: {
+				fill: 'red',
+				shape: 'ring',
+				text: 'Error!'
+			}
+		};
+
 		var node = this;
 
 		try {
 			this.nfcClient = new nfc.NFC();
 		} catch (err) {
 			node.log(err);
+			node.status(status.error);
 		}
 
 		this.nfcClient
 			.on('read', function (tag) {
-				var parsed;
-
-				if (!!tag.data && !!tag.offset) {
-					parsed = nfc.parse(tag.data.slice(tag.offset));
-				}
-
 				var msg = {
 					topic: node.topic,
 					payload: {
-						tag: tag,
-						parsed: parsed
+						tag: tag
 					}
 				};
 
@@ -56,17 +68,22 @@ module.exports = function (RED) {
 			.on('close', function () {
 				try {
 					node.nfcClient.stop();
+					node.status(status.disconnected);
 				} catch (err) {
 					node.error(err);
+					node.status(status.error);
 				}
 			})
 			.on('error', function (error) {
 				node.error(error);
+				node.status(status.error);
 			});
 
 		try {
 			node.nfcClient.start();
+			node.status(status.connected);
 		} catch (err) {
+			node.status(status.error);
 			node.nfcClient.stop();
 		}
 	};
