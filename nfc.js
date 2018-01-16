@@ -18,64 +18,63 @@
 //var RED = require(process.env.NODE_RED_HOME+"/red/red");
 module.exports = function (RED) {
 
-	var nfc 		= require('nfc').nfc;
-	var debounce 	= require('debounce');
+	var nfc = require('nfc').nfc;
+	var debounce = require('debounce');
 
-	function NFCNode(n) {
+	function NFCNode(config) {
 
-		RED.nodes.createNode(this, n);
+		RED.nodes.createNode(this, config);
 
-		this.name 		= n.name;
-		this.topic 		= n.topic;
-		this.interval 	= n.interval;
+		this.name = config.name;
+		this.topic = config.topic;
+		this.interval = config.interval;
 
 		var node = this;
 
-		var onRead = function (tag) {
-			var parsed;
-
-			if (!!tag.data && !!tag.offset) {
-				parsed = nfc.parse(tag.data.slice(tag.offset));
-			}
-
-			var msg = {
-				topic: node.topic,
-				payload: {
-					tag: tag,
-					parsed: parsed
-				}
-			};
-
-			node.send(msg);
-		}
-
-		var onClose = function () {
-			try {
-				node.n.stop();
-			} catch (err) {
-				node.error(err);
-			}
-		}
-
-		var onError = function (error) {
-			node.error(error);
-		}
-
 		try {
-			this.n = new nfc.NFC();
+			this.nfcClient = new nfc.NFC();
 		} catch (err) {
 			node.log(err);
 		}
 
-		this.n
-			.on('read', debounce(onRead, node.interval))
-			.on('close', onClose)
-			.on('error', onError);
+		var debouncedSend = debounce(function (message) {
+			node.send(message);
+		}, node.interval);
+
+
+		this.nfcClient
+			.on('read', function (tag) {
+				var parsed;
+
+				if (!!tag.data && !!tag.offset) {
+					parsed = nfc.parse(tag.data.slice(tag.offset));
+				}
+
+				var msg = {
+					topic: node.topic,
+					payload: {
+						tag: tag,
+						parsed: parsed
+					}
+				};
+
+				debouncedSend(msg);
+			})
+			.on('close', function () {
+				try {
+					node.nfcClient.stop();
+				} catch (err) {
+					node.error(err);
+				}
+			})
+			.on('error', function (error) {
+				node.error(error);
+			});
 
 		try {
-			this.n.start();
+			this.nfcClient.start();
 		} catch (err) {
-			node.n.stop();
+			node.nfcClient.stop();
 		}
 	};
 
