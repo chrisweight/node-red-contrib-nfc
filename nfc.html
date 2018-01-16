@@ -35,11 +35,6 @@
             <i class="icon-tag"></i> Topic</label>
         <input type="text" id="node-input-topic">
     </div>
-    <div class="form-row">
-        <label for="node-input-interval">
-            <i class="icon-tag"></i> Interval</label>
-        <input type="text" id="node-input-interval">
-    </div>
 </script>
 
 
@@ -63,10 +58,6 @@
             }, //  along with default values.
             topic: {
                 value: "nfc"
-            },
-            interval: {
-                value: 2000,
-                validate: RED.validators.number()
             }
         },
         inputs: 0, // set the number of inputs - only 0 or 1

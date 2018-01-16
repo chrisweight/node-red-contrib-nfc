@@ -19,7 +19,6 @@
 module.exports = function (RED) {
 
 	var nfc = require('nfc').nfc;
-	var debounce = require('debounce');
 
 	function NFCNode(config) {
 
@@ -27,7 +26,6 @@ module.exports = function (RED) {
 
 		this.name = config.name;
 		this.topic = config.topic;
-		this.interval = config.interval;
 
 		var node = this;
 
@@ -36,11 +34,6 @@ module.exports = function (RED) {
 		} catch (err) {
 			node.log(err);
 		}
-
-		var debouncedSend = debounce(function (message) {
-			node.send(message);
-		}, node.interval);
-
 
 		this.nfcClient
 			.on('read', function (tag) {
@@ -58,7 +51,7 @@ module.exports = function (RED) {
 					}
 				};
 
-				debouncedSend(msg);
+				node.send(msg);
 			})
 			.on('close', function () {
 				try {
@@ -72,7 +65,7 @@ module.exports = function (RED) {
 			});
 
 		try {
-			this.nfcClient.start();
+			node.nfcClient.start();
 		} catch (err) {
 			node.nfcClient.stop();
 		}
