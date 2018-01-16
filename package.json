@@ -1,17 +1,20 @@
 {
-    "name"         : "node-red-contrib-nfc",
-    "version"      : "0.0.2",
-    "description"  : "A NFC node for Node-RED",
+    "name": "node-red-contrib-nfc",
+    "version": "0.0.3",
+    "description": "A NFC node for Node-RED",
     "dependencies": {
         "nfc": "*"
     },
     "license": "Apache",
-    "repository" : {
-        "type":"git",
-        "url":"https://github.com/hardillb/node-red-contrib-nfc.git"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hardillb/node-red-contrib-nfc.git"
     },
-    "keywords": [ "node-red", "NFC" ],
-    "node-red"     : {
+    "keywords": [
+        "node-red",
+        "NFC"
+    ],
+    "node-red": {
         "nodes": {
             "nfc": "nfc.js"
         }
