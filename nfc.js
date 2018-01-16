@@ -18,17 +18,48 @@
 //var RED = require(process.env.NODE_RED_HOME+"/red/red");
 module.exports = function (RED) {
 
-	var nfc = require('nfc').nfc;
+	var nfc 		= require('nfc').nfc;
+	var debounce 	= require('debounce');
 
 	function NFCNode(n) {
 
 		RED.nodes.createNode(this, n);
 
-		this.name = n.name;
-		this.topic = n.topic;
-		this.interval = n.interval;
+		this.name 		= n.name;
+		this.topic 		= n.topic;
+		this.interval 	= n.interval;
 
 		var node = this;
+
+		var onRead = function (tag) {
+			var _parsed, _output;
+
+			if (!!tag.data && !!tag.offset) {
+				_parsed = nfc.parse(tag.data.slice(tag.offset));
+			}
+
+			var msg = {
+				topic: node.topic,
+				payload: {
+					tag: tag,
+					parsed: _parsed
+				}
+			};
+
+			node.send(msg);
+		}
+
+		var onClose = function () {
+			try {
+				node.n.stop();
+			} catch (err) {
+				node.error(err);
+			}
+		}
+
+		var onError = function (error) {
+			node.error(error);
+		}
 
 		try {
 			this.n = new nfc.NFC();
@@ -37,84 +68,14 @@ module.exports = function (RED) {
 		}
 
 		this.n
-			.on('read', function (tag) {
-				var _parsed, _output;
-
-				if (!!tag.data && !!tag.offset) {
-					_parsed = nfc.parse(tag.data.slice(tag.offset));
-				}
-
-				var msg = {
-					topic: node.topic,
-					payload: {
-						topic: node.topic || '',
-						tag: tag,
-						parsed: _parsed
-					}
-				};
-
-				node.send(msg);
-				/*
-				if (node.uid) {
-					if (node.uid == tag.uid) {
-						return;
-					} else {
-						node.uid = tag.uid;
-					}
-				} else {
-					node.uid = tag.uid;
-					node.timer = setTimeout(function () {
-						delete node.timer;
-						delete node.uid;
-					}, node.interval);
-				}
-
-				var msg = {};
-
-				if (node.topic) {
-					msg.topic = node.topic;
-				}
-
-				msg.payload = {
-					tag: tag,
-					parsed: _parsed
-				};
-				
-				node.send(msg);
-				*/
-			})
-			.on('close', function () {
-				try {
-					/*
-					if (node.timer) {
-						clearTimeout(node.timer);
-					}
-					if (node.reset) {
-						clearTimeout(node.reset);
-					}
-					*/
-					node.n.stop();
-				} catch (err) {
-					node.error(err);
-				}
-			})
-			.on('error', function (error) {
-				node.error(error);
-			});
-
+			.on('read', debounce(onRead, node.interval))
+			.on('close', onClose)
+			.on('error', onError);
 
 		try {
 			this.n.start();
 		} catch (err) {
 			node.n.stop();
-			/*
-			node.reset = setTimeout(function () {
-				node.log("late restart");
-				node.n.start();
-			}, 2000);
-			
-			node.reset.unref;
-			*/
 		}
 	};
 

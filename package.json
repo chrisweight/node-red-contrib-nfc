@@ -3,6 +3,7 @@
     "version": "0.0.5",
     "description": "A NFC node for Node-RED, updated and tweaked.",
     "dependencies": {
+        "debounce": "1.1.0",
         "nfc": "0.3.3"
     },
     "license": "Apache",
