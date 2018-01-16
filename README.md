@@ -1,6 +1,8 @@
 node-red-contrib-nfc
 ====================
 
+CLEANING UP AND UPDATING TO BRING IN LINE WITH ORIGINAL NODE-NFC REPO
+
 Depends on a modified version of the nfc npm node found here:
 
 https://github.com/hardillb/node-nfc
