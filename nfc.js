@@ -26,6 +26,7 @@ module.exports = function (RED) {
 
 		this.name = n.name;
 		this.topic = n.topic;
+		this.interval = n.interval;
 
 		var node = this;
 
@@ -37,13 +38,23 @@ module.exports = function (RED) {
 
 		this.n
 			.on('read', function (tag) {
-
 				var _parsed, _output;
 
 				if (!!tag.data && !!tag.offset) {
 					_parsed = nfc.parse(tag.data.slice(tag.offset));
 				}
 
+				var msg = {
+					topic: node.topic,
+					payload: {
+						topic: node.topic || '',
+						tag: tag,
+						parsed: _parsed
+					}
+				};
+
+				node.send(msg);
+				/*
 				if (node.uid) {
 					if (node.uid == tag.uid) {
 						return;
@@ -55,7 +66,7 @@ module.exports = function (RED) {
 					node.timer = setTimeout(function () {
 						delete node.timer;
 						delete node.uid;
-					}, 10000);
+					}, node.interval);
 				}
 
 				var msg = {};
@@ -70,6 +81,25 @@ module.exports = function (RED) {
 				};
 				
 				node.send(msg);
+				*/
+			})
+			.on('close', function () {
+				try {
+					/*
+					if (node.timer) {
+						clearTimeout(node.timer);
+					}
+					if (node.reset) {
+						clearTimeout(node.reset);
+					}
+					*/
+					node.n.stop();
+				} catch (err) {
+					node.error(err);
+				}
+			})
+			.on('error', function (error) {
+				node.error(error);
 			});
 
 
@@ -77,29 +107,14 @@ module.exports = function (RED) {
 			this.n.start();
 		} catch (err) {
 			node.n.stop();
-
+			/*
 			node.reset = setTimeout(function () {
 				node.log("late restart");
 				node.n.start();
 			}, 2000);
-
+			*/
 			node.reset.unref;
 		}
-
-		node
-			.on('close', function () {
-				try {
-					if (node.timer) {
-						clearTimeout(node.timer);
-					}
-					if (node.reset) {
-						clearTimeout(node.reset);
-					}
-					node.n.stop();
-				} catch (err) {
-					node.error(err);
-				}
-			});
 	};
 
 	RED.nodes.registerType("nfc", NFCNode);
