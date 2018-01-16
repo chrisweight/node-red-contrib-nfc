@@ -1,27 +1,24 @@
 {
-    "name": "node-red-contrib-nfc",
-    "version": "0.0.3",
-    "description": "A NFC node for Node-RED",
+    "name"         : "node-red-contrib-nfc",
+    "version"      : "0.0.2",
+    "description"  : "A NFC node for Node-RED, updated and tweaked.",
     "dependencies": {
-        "nfc": "*"
+        "nfc": "0.3.3"
     },
     "license": "Apache",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/hardillb/node-red-contrib-nfc.git"
+    "repository" : {
+        "type":"git",
+        "url":"https://github.com/chrisweight/node-red-contrib-nfc.git"
     },
-    "keywords": [
-        "node-red",
-        "NFC"
-    ],
-    "node-red": {
+    "keywords": [ "node-red", "NFC" ],
+    "node-red"     : {
         "nodes": {
             "nfc": "nfc.js"
         }
     },
     "author": {
-        "name": "Benjamin Hardill",
-        "email": "hardillb@gmail.com",
-        "url": "http://www.hardill.me.uk/wordpress/"
+        "name": "Chris Weight",
+        "email": "chris@chrisweight.com",
+        "url": "http://www.chrisweight.com"
     }
 }
