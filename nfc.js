@@ -42,7 +42,6 @@ module.exports = function (RED) {
 
 				if (!!tag.data && !!tag.offset) {
 					_parsed = nfc.parse(tag.data.slice(tag.offset));
-					console.log('read -> parsed', _parsed);
 				}
 
 				if (node.uid) {
@@ -65,7 +64,10 @@ module.exports = function (RED) {
 					msg.topic = node.topic;
 				}
 
-				msg.payload = tag;
+				msg.payload = {
+					tag: tag,
+					parsed: _parsed
+				};
 				
 				node.send(msg);
 			});
