@@ -32,17 +32,17 @@ module.exports = function (RED) {
 		var node = this;
 
 		var onRead = function (tag) {
-			var _parsed, _output;
+			var parsed;
 
 			if (!!tag.data && !!tag.offset) {
-				_parsed = nfc.parse(tag.data.slice(tag.offset));
+				parsed = nfc.parse(tag.data.slice(tag.offset));
 			}
 
 			var msg = {
 				topic: node.topic,
 				payload: {
 					tag: tag,
-					parsed: _parsed
+					parsed: parsed
 				}
 			};
 
