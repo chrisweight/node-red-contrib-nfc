@@ -15,19 +15,20 @@
  **/
 
 // Require main module
-//var RED = require(process.env.NODE_RED_HOME+"/red/red");
+// var RED = require(process.env.NODE_RED_HOME+"/red/red");
 module.exports = function (RED) {
 
-	var nfc = require('nfc').nfc;
+	var debounce = require('debounce'),
+		nfc 	 = require('nfc').nfc;
 
 	function NFCNode(config) {
 
 		RED.nodes.createNode(this, config);
 
-		this.name = config.name;
-		this.topic = config.topic;
+		this.name 	= config.name;
+		this.topic 	= config.topic;
 
-		var status = {
+		this.status = {
 			connected: {
 				fill: 'green',
 				shape: 'dot',
@@ -41,11 +42,24 @@ module.exports = function (RED) {
 			error: {
 				fill: 'red',
 				shape: 'ring',
-				text: 'Error!'
+				text: 'Error'
 			}
 		};
 
 		var node = this;
+
+		node.onRead = function(tag) {
+			var msg = {
+				topic: node.topic,
+				payload: {
+					tag: tag
+				}
+			};
+
+			node.send(msg);
+		};
+
+		node.debouncedRead = debounce(node.onRead, 1000, true);
 
 		try {
 			node.log('About to try and start NFC client');
@@ -57,14 +71,13 @@ module.exports = function (RED) {
 
 		this.nfcClient
 			.on('read', function (tag) {
-				var msg = {
-					topic: node.topic,
-					payload: {
-						tag: tag
-					}
-				};
+				if (node.uid === tag.uid) {
+					node.debouncedRead(tag);
+					return;
+				}
 
-				node.send(msg);
+				node.uid = tag.uid;
+				node.onRead(tag);
 			})
 			.on('close', function () {
 				try {
