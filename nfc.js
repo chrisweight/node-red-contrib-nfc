@@ -84,13 +84,25 @@ module.exports = function (RED) {
 		};
 
 		var debouncedRead = debounce(onRead, 1000, false);
+		var initTimeout;
 
 		try {
 			node.log('About to try and start NFC client');
+			
+			if (!!initTimeout) {
+				return;
+			}
+			
+			clearTimeout(initTimeout);
 			this.nfcClient = new nfc.NFC();
 		} catch (err) {
 			node.error(err);
 			node.status(status.error);
+			nfc.stop()
+
+			initTimeout = setTimeout(function() {
+				node.nfcClient = new nfc.NFC();
+			}, 1000);
 		}
 
 		this.nfcClient
