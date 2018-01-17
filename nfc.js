@@ -28,7 +28,7 @@ module.exports = function (RED) {
 		this.name 	= config.name;
 		this.topic 	= config.topic;
 
-		this.status = {
+		var status = {
 			connected: {
 				fill: 'green',
 				shape: 'dot',
@@ -48,7 +48,7 @@ module.exports = function (RED) {
 
 		var node = this;
 
-		node.onRead = function(tag) {
+		var onRead = function(tag) {
 			var msg = {
 				topic: node.topic,
 				payload: {
@@ -59,7 +59,7 @@ module.exports = function (RED) {
 			node.send(msg);
 		};
 
-		node.debouncedRead = debounce(node.onRead, 1000, false);
+		var debouncedRead = debounce(node.onRead, 1000, false);
 
 		try {
 			node.log('About to try and start NFC client');
@@ -72,12 +72,12 @@ module.exports = function (RED) {
 		this.nfcClient
 			.on('read', function (tag) {
 				if (node.uid === tag.uid) {
-					node.debouncedRead(tag);
+					debouncedRead(tag);
 					return;
 				}
 
 				node.uid = tag.uid;
-				node.onRead(tag);
+				onRead(tag);
 			})
 			.on('close', function () {
 				try {
