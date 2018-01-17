@@ -59,7 +59,7 @@ module.exports = function (RED) {
 			node.send(msg);
 		};
 
-		node.debouncedRead = debounce(node.onRead, 1000, true);
+		node.debouncedRead = debounce(node.onRead, 1000, false);
 
 		try {
 			node.log('About to try and start NFC client');
