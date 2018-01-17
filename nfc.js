@@ -54,6 +54,31 @@ module.exports = function (RED) {
 			};
 		};
 
+
+		var throttle = function(func, wait) {
+			var last, deferTimer;
+			
+			return function() {
+				var context = this,
+					args 	= arguments,
+					now		= +new Date;
+				
+				if (last && now < last + wait) {
+					clearTimeout(deferTimer);
+					
+					deferTimer = setTimeout(function() {
+						last = now;
+						func.apply(context, args);
+					}, wait);
+
+					return;
+				}
+				
+				last = now;
+				func.apply(context, args);
+			};
+		};
+
 		var status = {
 			connected: {
 				fill: 'green',
@@ -82,6 +107,8 @@ module.exports = function (RED) {
 		};
 
 		var debouncedRead = debounce(onRead, 1000, true);
+		var throttledRead = throttle(onRead, 1000);
+
 		var initTimeout;
 
 		try {
@@ -106,8 +133,8 @@ module.exports = function (RED) {
 
 		this.nfcClient
 			.on('read', function (tag) {
-				if (node.uid === tag.uid) {
-					debouncedRead(tag);
+				if (node.uid === tag.id) {
+					throttledRead(tag);
 					return;
 				}
 
