@@ -62,6 +62,12 @@ module.exports = function (RED) {
 				var context = this,
 					args 	= arguments,
 					now		= +new Date;
+
+				this.reset = function() {
+					clearTimeout(deferTimer);
+					now 	= +new Date;
+					last 	= now;
+				}
 				
 				if (last && now < last + wait) {
 					clearTimeout(deferTimer);
@@ -139,6 +145,7 @@ module.exports = function (RED) {
 				}
 
 				node.uid = tag.uid;
+				throttledRead.reset();
 				onRead(tag);
 			})
 			.on('close', function () {
