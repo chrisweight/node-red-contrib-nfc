@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-nfc",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "description": "A NFC node for Node-RED, updated and tweaked.",
     "dependencies": {
         "nfc": "0.3.3"
