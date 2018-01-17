@@ -27,6 +27,7 @@ module.exports = function (RED) {
 		this.name 	= config.name;
 		this.topic 	= config.topic;
 
+		// Not using this just yet as it isn't really the right approach...
 		var debounce = function (func, wait, immediate) {
 			var timeout;
 
@@ -63,12 +64,6 @@ module.exports = function (RED) {
 					args 	= arguments,
 					now		= +new Date;
 
-				this.reset = function() {
-					clearTimeout(deferTimer);
-					now 	= null;
-					last 	= null;
-				}
-				
 				if (last && now < last + wait) {
 					clearTimeout(deferTimer);
 					
@@ -112,7 +107,7 @@ module.exports = function (RED) {
 			});
 		};
 
-		var debouncedRead = debounce(onRead, 1000, true);
+		// var debouncedRead = debounce(onRead, 1000, true);
 		var throttledRead = throttle(onRead, 1000);
 
 		var initTimeout;
@@ -145,7 +140,6 @@ module.exports = function (RED) {
 				}
 
 				node.uid = tag.uid;
-				throttledRead.reset();
 				onRead(tag);
 			})
 			.on('close', function () {
