@@ -65,8 +65,8 @@ module.exports = function (RED) {
 
 				this.reset = function() {
 					clearTimeout(deferTimer);
-					now 	= +new Date;
-					last 	= now;
+					now 	= null;
+					last 	= null;
 				}
 				
 				if (last && now < last + wait) {
