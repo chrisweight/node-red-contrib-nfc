@@ -77,13 +77,11 @@ module.exports = function (RED) {
 		function onRead(tag) {
 			node.send({
 				topic: node.topic,
-				payload: {
-					tag: tag
-				}
+				payload:tag
 			});
 		};
 
-		var debouncedRead = debounce(onRead, 1000, false);
+		var debouncedRead = debounce(onRead, 1000, true);
 		var initTimeout;
 
 		try {
@@ -92,12 +90,13 @@ module.exports = function (RED) {
 			if (!!initTimeout) {
 				return;
 			}
-			
+
 			clearTimeout(initTimeout);
 			this.nfcClient = new nfc.NFC();
 		} catch (err) {
 			node.error(err);
 			node.status(status.error);
+
 			nfc.stop()
 
 			initTimeout = setTimeout(function() {
@@ -108,7 +107,7 @@ module.exports = function (RED) {
 		this.nfcClient
 			.on('read', function (tag) {
 				if (node.uid === tag.uid) {
-					// debouncedRead(tag);
+					debouncedRead(tag);
 					return;
 				}
 
